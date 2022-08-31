@@ -135,3 +135,7 @@ A = (A<<3) + (A<<2) + (A<<1) + A ; //对应A * 15
   assign product_rdy       = product_rdy_r;
   assign product           = product_r;
 ```
+
+
+# 乘法器——流水线版
+
