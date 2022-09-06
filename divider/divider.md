@@ -74,6 +74,21 @@ BTW，先明确一下除法器的输入输出信号，以方便我们后续讨�
 其实，抛开一切繁杂的细节（这只会让我们犹豫不决），上述语言转化为 verilog 代码其实就是：
 
 ```verilog
+input   clk,
+input   rstn,
+input   data_ready,
+
+input [M:0]               dividend,
+input [M-1:0]             divisor,
+input [N-M:0]             merchant_ci , //上一级输出的商
+input [N-M-1:0]           dividend_ci , //原始除数
+
+output reg [N-M-1:0]      dividend_kp,  //原始被除数信息
+output reg [M-1:0]        divisor_kp,   //原始除数信息
+output reg                rdy ,
+output reg [N-M:0]        merchant ,  //运算单元输出商
+output reg [M-1:0]        remainder   //运算单元输出余数
+
 if (dividend >= divisor) begin
     quotient    <= (quotient<<1) + 1'b1;    // 商为1，右移动后写入
     remainder   <= dividend - divisor;      // 求余
@@ -83,4 +98,26 @@ end else begin
 end
 ```
 
-当然这样写肯定是不对的😅。
+当然这样写肯定是不对的😅。但不必担心，编写 verilog 程序本就是不断试错的过程。然后，我们加上复位和非ready的情况，完善上面的代码：
+
+```verilog
+always@(posedge clk or negedge rstn) begin
+    if (!rstn) begin
+        res_ready <= 0;
+        quotient  <= 0;
+        remainder <= 0;
+    end else if (data_ready) begin
+        if (dividend >= divisor) begin
+            quotient    <= (quotient<<1) + 1'b1;    // 商为1，右移动后写入
+            remainder   <= dividend - divisor;      // 求余
+        end else begin
+            quotient    <= quotient<<1;         // 商为0
+            remainder   <= dividend;            // 余数不变
+        end
+    end else begin
+        res_ready <= 0;
+        quotient  <= 0;
+        remainder <= 0;
+    end
+end
+```
