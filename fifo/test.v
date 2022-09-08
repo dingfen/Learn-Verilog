@@ -12,6 +12,12 @@ fifo ff( .clk(clk), .rst(rst), .buf_in(buf_in), .buf_out(buf_out),
          .buf_full(buf_full), .fifo_counter(fifo_counter) );
 
 initial
+begin            
+    $dumpfile("wave.vcd");        //生成的vcd文件名称
+    $dumpvars(0, fifo_test);    //tb模块名称
+end
+
+initial
 begin
    clk = 0;
    rst = 1;
@@ -64,6 +70,8 @@ begin
         pop(tempdata);
         push(5);
         pop(tempdata);
+
+        #100 $finish(2);
 end
 
 always
